@@ -44,4 +44,10 @@ public class SensorController {
         return sensor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSensor(@PathVariable Long id){
+        sensorRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
