@@ -46,7 +46,7 @@ public class SensorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSensor(@PathVariable Long id){
-        sensorRepository.deleteById(id);
+        repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
