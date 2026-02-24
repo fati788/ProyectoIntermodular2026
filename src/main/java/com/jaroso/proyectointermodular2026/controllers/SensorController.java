@@ -49,5 +49,7 @@ public class SensorController {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+    //FALTA PUT el Update
+
 
 }

@@ -43,6 +43,7 @@ public class LecturaController {
     /**
      * Devuelve las lecturas de un sensor en un intervalo de fechas
      * @param idSensor
+     * REQUEST PARAM
      * @param intervaloFechasDto (Json)
      */
     @GetMapping("/lecturas/{idSensor}")
