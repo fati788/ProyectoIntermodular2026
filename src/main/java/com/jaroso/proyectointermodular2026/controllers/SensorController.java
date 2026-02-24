@@ -49,7 +49,7 @@ public class SensorController {
         logger.info("Actualizando sensor: " + sensorUpdateDto);
         Optional<Sensor> sensor = sensorRepository.findById(id);
         if (sensor.isPresent()){
-            sensor.get().setEstado(sensorUpdateDto.estadoSensor());
+            sensor.get().setEstado(sensorUpdateDto.estado());
             return ResponseEntity.ok(mapper.toDto(sensorRepository.save(sensor.get())));
         } else {
             return ResponseEntity.notFound().build();
