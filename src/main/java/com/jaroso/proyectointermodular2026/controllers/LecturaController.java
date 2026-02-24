@@ -1,6 +1,5 @@
 package com.jaroso.proyectointermodular2026.controllers;
 
-import com.jaroso.proyectointermodular2026.dtos.IntervaloFechasDto;
 import com.jaroso.proyectointermodular2026.dtos.LecturaCreateDto;
 import com.jaroso.proyectointermodular2026.dtos.LecturaDto;
 import com.jaroso.proyectointermodular2026.entities.Lectura;
@@ -14,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -42,17 +42,15 @@ public class LecturaController {
 
     /**
      * Devuelve las lecturas de un sensor en un intervalo de fechas
-     * @param idSensor
-     * REQUEST PARAM
-     * @param intervaloFechasDto (Json)
+     * @param idSensor id del sensor del que se quieren las lecturas
+     *
      */
     @GetMapping("/lecturas/{idSensor}")
     public ResponseEntity<List<LecturaDto>> getLecturasIntervalo(@PathVariable Long idSensor,
-                                                                 @RequestBody IntervaloFechasDto intervaloFechasDto) {
+                                                                 @RequestParam LocalDateTime inicio,
+                                                                 @RequestParam LocalDateTime fin) {
         List<Lectura> lecturas = lecturaRepository
-                .findAllBySensorIdAndFechaHoraBetween(idSensor,
-                        intervaloFechasDto.inicio(),
-                        intervaloFechasDto.fin());
+                .findAllBySensorIdAndFechaHoraBetween(idSensor,inicio,fin);
         return ResponseEntity.ok(lecturas.stream().map(lecturaMapper::toDto).toList());
     }
 
@@ -82,6 +80,5 @@ public class LecturaController {
                     .body(lecturaMapper.toDto(lectura));
         }
     }
-
 
 }
