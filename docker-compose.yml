@@ -1,0 +1,9 @@
+services:
+  mqtt:
+    image: docker.io/eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"      # Puerto estándar MQTT
+      - "9001:9001"      # WebSockets (opcional)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config/

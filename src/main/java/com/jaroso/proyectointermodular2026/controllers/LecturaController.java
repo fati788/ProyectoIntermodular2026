@@ -66,13 +66,11 @@ public class LecturaController {
 
         Lectura lectura = lecturaMapper.toEntity(lecturaCreateDto);
 
-        //Sacamos el sensor de la BBDD, esta consulta es rápida pues hay pocos sensores en BBDD
-        //Se podría optimizar un poco con existsById y getReferencedById
         Optional<Sensor> sensor = sensorRepository.findById(lecturaCreateDto.sensorId());
         if (sensor.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-            //Le ponemos el id de sensor a la lectura y la insertamos
+
             lectura.setSensor(sensor.get());
             lecturaRepository.save(lectura);
 
