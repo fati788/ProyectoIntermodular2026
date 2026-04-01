@@ -36,8 +36,8 @@ public class MqttPublisher {
 
     Logger logger = Logger.getLogger(MqttPublisher.class.getName());
 
-    public MqttPublisher(@Value("${mqtt.host:localhost}") String host,
-                         @Value("${mqtt.port:1883}") int port) {
+    public MqttPublisher(@Value("${mqtt.host}") String host,   //Cambiar el IP
+                         @Value("${mqtt.port}") int port) {
         this.host = host;
         this.port = port;
         client = Mqtt3Client.builder()
@@ -68,18 +68,25 @@ public class MqttPublisher {
                             .topicFilter("4/3/0")
                             .callback(msg -> procesarTemperatura(msg, 1))
                             .send();
-
-                    logger.info("Suscribiéndose a iot/sensor/2/");
+                   /* logger.info("Suscribiéndose a 4/11/0");
                     client.subscribeWith()
-                            .topicFilter("4/1/0")
-                            .callback(msg -> procesarTemperatura(msg, 2))
+                            .topicFilter("4/11/0")
+                            .callback(msg -> procesarHumedad(msg, 7))
                             .send();
-
+                   /*
+                   Sensor de NIVEL !
+                    logger.info("Suscribiéndose a iot/sensor/4/14/0");
+                    client.subscribeWith()
+                            .topicFilter("4/14/0")
+                            .callback(msg -> procesarNivel(msg, 2))
+                            .send();
+                    */
+                    /* SENSOR HUMEDAD
                     logger.info("Suscribiéndose a iot/sensor/3/");
                     client.subscribeWith()
-                            .topicFilter("4/2/0")
+                            .topicFilter("4/10/0")
                             .callback(msg -> procesarHumedad(msg, 3))
-                            .send();
+                            .send();*/
 
                 })
                 .exceptionally(throwable -> {
@@ -91,24 +98,58 @@ public class MqttPublisher {
 
     private void procesarTemperatura(Mqtt3Publish msg, long sensorId) {
         logger.info("Recibiendo mensaje temperatura de: " + msg.getTopic());
-        String payload = new String(msg.getPayloadAsBytes());
+       String payload = new String(msg.getPayloadAsBytes());
+       logger.info(payload);
+
+
+       /*
         //Convertir dato a lo que necesitamos
         JsonNode json = objectMapper.readTree(payload);
         double valor = json.get("valor").asDouble();
 
         //Guardar la lectura en BBDD
-        saveLectura(valor, sensorId);
+        saveLectura(valor, sensorId);*/
+    }
+    public void procesarNivel(Mqtt3Publish msg, long sensorId){
+        logger.info("Recibiendo mensaje del Sensor de Nivel de: " + msg.getTopic());
+
+        String payload = new String(msg.getPayloadAsBytes());
+        logger.info(payload); // Ej: "58%"
+
+        /*try {
+            // Quitar el símbolo %
+            String limpio = payload.replace("%", "").trim();
+
+            // Convertir a double
+            double valor = Double.parseDouble(limpio);
+
+            // Guardar en BBDD
+            saveLectura(valor, sensorId);
+
+        } catch (NumberFormatException e) {
+            logger.severe("Error convirtiendo humedad: " + payload);
+        }*/
     }
 
     private void procesarHumedad(Mqtt3Publish msg, long sensorId) {
         logger.info("Recibiendo mensaje humedad de: " + msg.getTopic());
-        String payload = new String(msg.getPayloadAsBytes());
-        //Convertir dato a lo que necesitamos
-        JsonNode json = objectMapper.readTree(payload);
-        double valor = json.get("valor").asDouble();
 
-        //Guardar la lectura en BBDD
-        saveLectura(valor, sensorId);
+        String payload = new String(msg.getPayloadAsBytes());
+        logger.info(payload); // Ej: "58%"
+
+        try {
+            // Quitar el símbolo %
+            String limpio = payload.replace("%", "").trim();
+
+            // Convertir a double
+            double valor = Double.parseDouble(limpio);
+
+            // Guardar en BBDD
+            saveLectura(valor, sensorId);
+
+        } catch (NumberFormatException e) {
+            logger.severe("Error convirtiendo humedad: " + payload);
+        }
     }
 
     /**

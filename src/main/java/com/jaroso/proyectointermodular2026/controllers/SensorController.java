@@ -3,6 +3,7 @@ package com.jaroso.proyectointermodular2026.controllers;
 import com.jaroso.proyectointermodular2026.dtos.SensorCreatetoDto;
 import com.jaroso.proyectointermodular2026.dtos.SensorDto;
 import com.jaroso.proyectointermodular2026.dtos.SensorUpdateDto;
+import com.jaroso.proyectointermodular2026.entities.EstadoSensor;
 import com.jaroso.proyectointermodular2026.entities.Sensor;
 import com.jaroso.proyectointermodular2026.mappers.SensorMapper;
 import com.jaroso.proyectointermodular2026.repositories.SensorRepository;
@@ -56,9 +57,10 @@ public class SensorController {
             sensor.get().setEstado(sensorUpdateDto.estado());
 
             // publica un mensaje MQTT al topic del actuador (ej: actuadores/1/comando con payload ON o OFF)
-            String payload = String.format("{\"estado\": \"%s\"}", sensorUpdateDto.estado());
-            mqttPublisher.publish("iot/sensor/" +
-                    sensor.get().getId() + "/", payload);
+            if (sensorUpdateDto.estado().equals(EstadoSensor.ACTIVO))
+                mqttPublisher.publish("4/"+sensor.get().getId()+"/0", "0");
+            else if (sensorUpdateDto.estado().equals(EstadoSensor.INACTIVO))
+                mqttPublisher.publish("4/"+sensor.get().getId()+"/0", "1");
 
             return ResponseEntity.ok(mapper.toDto(sensorRepository.save(sensor.get())));
         } else {
