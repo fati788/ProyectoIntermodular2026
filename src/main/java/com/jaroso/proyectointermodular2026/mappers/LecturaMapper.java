@@ -12,5 +12,8 @@ public interface LecturaMapper {
     @Mapping(target = "sensorId", source = "sensor.id")
     LecturaDto toDto(Lectura lectura);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fechaHora", ignore = true)
+    @Mapping(target = "sensor", ignore = true)
     Lectura toEntity(LecturaCreateDto lecturaCreateDto);
 }

@@ -1,10 +1,10 @@
 package com.jaroso.proyectointermodular2026.repositories;
 
 
-import com.jaroso.proyectointermodular2026.entities.Sensor;
+import com.jaroso.proyectointermodular2026.entities.Sector;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SensorRepository extends JpaRepository<Sensor, Long> {
+public interface SectorRepository extends JpaRepository<Sector, Long> {
 }

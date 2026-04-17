@@ -1,11 +1,13 @@
 package com.jaroso.proyectointermodular2026.controllers;
 
-import com.jaroso.proyectointermodular2026.dtos.SensorCreatetoDto;
+
+import com.jaroso.proyectointermodular2026.dtos.SensorCreateDto;
 import com.jaroso.proyectointermodular2026.dtos.SensorDto;
 import com.jaroso.proyectointermodular2026.dtos.SensorUpdateDto;
-import com.jaroso.proyectointermodular2026.entities.EstadoSensor;
+import com.jaroso.proyectointermodular2026.entities.Sector;
 import com.jaroso.proyectointermodular2026.entities.Sensor;
 import com.jaroso.proyectointermodular2026.mappers.SensorMapper;
+import com.jaroso.proyectointermodular2026.repositories.SectorRepository;
 import com.jaroso.proyectointermodular2026.repositories.SensorRepository;
 import com.jaroso.proyectointermodular2026.servecies.MqttPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,13 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @RestController
-@RequestMapping("/api/sensores")
 public class SensorController {
+
     @Autowired
     private SensorRepository sensorRepository;
+
+    @Autowired
+    private SectorRepository sectorRepository;
 
     @Autowired
     private SensorMapper mapper;
@@ -38,15 +43,20 @@ public class SensorController {
 
     @GetMapping("/sensors/{id}")
     public ResponseEntity<SensorDto> getById(@PathVariable Long id){
+        logger.info("Leyendo sensor: " + id);
         Optional<SensorDto> sensor = sensorRepository.findById(id).map(mapper::toDto);
         return sensor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/sensors")
-    public ResponseEntity<SensorDto> createSensor(@RequestBody SensorCreatetoDto sensor){
+    public ResponseEntity<SensorDto> createSensor(@RequestBody SensorCreateDto sensor){
         Sensor sensorEntity = mapper.toEntity(sensor);
+
+        Sector sector = sectorRepository.findById(sensor.sectorId()).orElseThrow(() -> new IllegalArgumentException("Sector no encontrado"));
+        sensorEntity.setSector(sector);
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(mapper.toDto(sensorRepository.save(sensorEntity)));
+                             .body(mapper.toDto(sensorRepository.save(sensorEntity)));
     }
 
     @PutMapping("/sensors/{id}")
@@ -57,10 +67,8 @@ public class SensorController {
             sensor.get().setEstado(sensorUpdateDto.estado());
 
             // publica un mensaje MQTT al topic del actuador (ej: actuadores/1/comando con payload ON o OFF)
-            if (sensorUpdateDto.estado().equals(EstadoSensor.ACTIVO))
-                mqttPublisher.publish("4/"+sensor.get().getId()+"/0", "0");
-            else if (sensorUpdateDto.estado().equals(EstadoSensor.INACTIVO))
-                mqttPublisher.publish("4/"+sensor.get().getId()+"/0", "1");
+            String payload = String.format("{\"estado\": \"%s\"}", sensorUpdateDto.estado());
+            mqttPublisher.publish(sensor.get().getTopicMQTTAct(), payload);
 
             return ResponseEntity.ok(mapper.toDto(sensorRepository.save(sensor.get())));
         } else {
@@ -73,5 +81,6 @@ public class SensorController {
         sensorRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.jaroso.proyectointermodular2026.controllers;
 
+
 import com.jaroso.proyectointermodular2026.dtos.LecturaCreateDto;
 import com.jaroso.proyectointermodular2026.dtos.LecturaDto;
 import com.jaroso.proyectointermodular2026.entities.Lectura;
@@ -55,6 +56,20 @@ public class LecturaController {
     }
 
     /**
+     * Devuelve la última lectura de un sensor
+     * @param idSensor id del sensor del que se quiere la última lectura
+     */
+    @GetMapping("/lecturas/{idSensor}/ultima")
+    public ResponseEntity<LecturaDto> getUltimaLectura(@PathVariable Long idSensor) {
+        Optional<Lectura> ultimaLectura = lecturaRepository.findTopBySensorIdOrderByFechaHoraDesc(idSensor);
+        if (ultimaLectura.isPresent()) {
+            return ResponseEntity.ok(lecturaMapper.toDto(ultimaLectura.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * Guarda una lectura en la BBDD
      * @param lecturaCreateDto  (Json) con los datos de la lectura a guardar,
      *                          incluido el id del sensor al que pertenece
@@ -66,11 +81,13 @@ public class LecturaController {
 
         Lectura lectura = lecturaMapper.toEntity(lecturaCreateDto);
 
+        //Sacamos el sensor de la BBDD, esta consulta es rápida pues hay pocos sensores en BBDD
+        //Se podría optimizar un poco con existsById y getReferencedById
         Optional<Sensor> sensor = sensorRepository.findById(lecturaCreateDto.sensorId());
         if (sensor.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-
+            //Le ponemos el id de sensor a la lectura y la insertamos
             lectura.setSensor(sensor.get());
             lecturaRepository.save(lectura);
 
@@ -78,5 +95,6 @@ public class LecturaController {
                     .body(lecturaMapper.toDto(lectura));
         }
     }
+
 
 }
